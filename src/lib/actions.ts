@@ -9,7 +9,7 @@ import type { ResultProfile } from './types';
 export async function saveAssessmentResult(userId: string, result: Omit<ResultProfile, 'persona'>, persona: string) {
   if (!adminDb) {
     console.error("Firebase Admin not initialized. Cannot save assessment result.");
-    throw new Error('Server configuration error.');
+    throw new Error('The server is not configured for Firebase. Please ensure FIREBASE_SERVICE_ACCOUNT_KEY is set in your environment variables.');
   }
 
   try {
