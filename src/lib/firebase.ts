@@ -1,11 +1,10 @@
 
-import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getApps, initializeApp, getApp, type FirebaseOptions } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import { getApps as getAdminApps, initializeApp as initializeAdminApp, getApp as getAdminApp, cert } from 'firebase-admin/app';
 import { getFirestore as getAdminFirestore } from 'firebase-admin/firestore';
 
-// Client-side config
 const firebaseConfig: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -15,28 +14,8 @@ const firebaseConfig: FirebaseOptions = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Client-side initialization (runs in the browser)
-function initializeClientApp() {
-    if (getApps().length > 0) {
-        return getApp();
-    }
-    const app = initializeApp(firebaseConfig);
-
-    if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_EMULATOR_HOST) {
-      try {
-        console.log('Connecting client to Firebase Emulators');
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        connectFirestoreEmulator(db, process.env.NEXT_PUBLIC_EMULATOR_HOST, 8080);
-        connectAuthEmulator(auth, `http://${process.env.NEXT_PUBLIC_EMULATOR_HOST}:9099`, { disableWarnings: true });
-      } catch (error) {
-        console.error('Error connecting client to Firebase emulators:', error);
-      }
-    }
-    return app;
-}
-
-const app = initializeClientApp();
+// Initialize Firebase for client-side
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
@@ -59,7 +38,17 @@ if (typeof window === 'undefined') {
     } else {
         console.warn("Firebase Admin SDK service account key not found. Server-side operations will be skipped.");
         // Create a dummy object to avoid breaking imports
-        adminDb = {} as import('firebase-admin/firestore').Firestore;
+        adminDb = {
+          collection: (path: string) => {
+            console.log(`[DUMMY] Accessing collection: ${path}. Firebase Admin not configured.`);
+            return {
+              add: async (data: any) => {
+                console.log(`[DUMMY] Adding document to ${path}:`, data);
+                return { id: `local-dummy-id-${Date.now()}` };
+              },
+            } as any;
+          },
+        } as import('firebase-admin/firestore').Firestore;
     }
 } else {
     // On the client, we don't need the adminDb, but we need to export it.

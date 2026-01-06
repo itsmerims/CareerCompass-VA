@@ -7,11 +7,6 @@ import type { ResultProfile } from './types';
 
 // The result object here is everything in ResultProfile except the persona, which is passed separately.
 export async function saveAssessmentResult(userId: string, result: Omit<ResultProfile, 'persona'>, persona: string) {
-  if (!adminDb.collection) {
-    console.log("Firebase Admin not configured. Skipping save. Profile data:", { ...result, persona, userId });
-    return { success: true, id: 'local-test-id' };
-  }
-  
   try {
     const docRef = await adminDb.collection('results').add({
       userId,
