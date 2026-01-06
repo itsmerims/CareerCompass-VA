@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { useState, useMemo, startTransition } from "react";
-import type { Answer, ResultProfile, RoadmapStep, AnswerWeight, QuizCategory } from "@/lib/types";
+import type { AnswerWeight, ResultProfile, QuizCategory } from "@/lib/types";
 import { questions, totalPossibleScores } from "@/lib/questions";
 import { CATEGORIES, CATEGORY_NAMES } from "@/lib/types";
-import { generateVaRoadmap } from "@/ai/flows/generate-va-roadmap";
-import { saveResultProfile } from "@/lib/actions";
+import { generateVaRoadmap, type GenerateVaRoadmapOutput } from "@/ai/flows/generate-va-roadmap";
+import { saveAssessmentResult } from "@/lib/actions";
 
 import { Quiz } from "@/components/quiz";
 import { Results } from "@/components/results";
@@ -23,7 +23,7 @@ export default function Home() {
   const [appState, setAppState] = useState<AppState>("intro");
   const [selectedAnswers, setSelectedAnswers] = useState<AnswerWeight[]>([]);
   const [results, setResults] = useState<ResultProfile | null>(null);
-  const [roadmap, setRoadmap] = useState<RoadmapStep[] | null>(null);
+  const [roadmap, setRoadmap] = useState<GenerateVaRoadmapOutput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
@@ -77,13 +77,15 @@ export default function Home() {
       const resultProfile: ResultProfile = {
         scores: percentageScores,
         recommendedPath: CATEGORY_NAMES[recommendedPath],
+        persona: CATEGORY_NAMES[recommendedPath],
       };
 
       setResults(resultProfile);
       setAppState("results");
       
       // Save result to Firestore without blocking UI
-      saveResultProfile(resultProfile).catch(err => {
+      // Using a placeholder userId for now. This will be replaced with the actual user ID after implementing auth.
+      saveAssessmentResult("guest-user", { scores: resultProfile.scores, recommendedPath: resultProfile.recommendedPath }, resultProfile.persona).catch(err => {
         console.error("Failed to save results:", err);
         toast({
           variant: "destructive",
@@ -99,13 +101,10 @@ export default function Home() {
 
     setIsGenerating(true);
     try {
-      const output = await generateVaRoadmap({ careerPath: results.recommendedPath });
-      if (output.roadmap) {
-        setRoadmap(output.roadmap);
-        setAppState("roadmap");
-      } else {
-        throw new Error("Roadmap generation failed.");
-      }
+      const output = await generateVaRoadmap({ persona: results.persona });
+      setRoadmap(output);
+      setAppState("roadmap");
+      
     } catch (error) {
       console.error("Error generating roadmap:", error);
       toast({

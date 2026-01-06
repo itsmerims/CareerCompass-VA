@@ -105,8 +105,8 @@ export const questions: Question[] = [
     id: 11,
     text: "Do you prefer working in a quiet, focused environment or a fast-paced, interactive one?",
     answers: [
-        { text: "Quiet and focused, where I can concentrate on data or writing.", weights: { analytical: 5, administrative: 3 } },
-        { text: "Fast-paced and interactive, like social media or customer support.", weights: { creative: 4, customerCentric: 5 } },
+        { text: "Quiet, focused (Data/Writing)", weights: { analytical: 5, administrative: 3 } },
+        { text: "Fast-paced, interactive (SMM/Customer Support)", weights: { creative: 4, customerCentric: 5 } },
         { text: "A mix of both is ideal.", weights: { technical: 3, administrative: 2 } },
         { text: "I'm adaptable to either environment.", weights: { } },
     ]

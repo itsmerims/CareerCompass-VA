@@ -9,11 +9,11 @@ export const CATEGORIES = [
 export type QuizCategory = typeof CATEGORIES[number];
 
 export const CATEGORY_NAMES: Record<QuizCategory, string> = {
-  administrative: 'Administrative',
-  creative: 'Creative',
-  technical: 'Technical',
-  analytical: 'Analytical',
-  customerCentric: 'Customer-Centric',
+  administrative: 'The Optimizer', // Admin
+  creative: 'The Visionary', // Creative
+  technical: 'The Architect', // Tech
+  analytical: 'The Storyteller', // Content/Analytical
+  customerCentric: 'The Reliable', // Customer Support
 };
 
 export type AnswerWeight = Partial<Record<QuizCategory, number>>;
@@ -32,9 +32,16 @@ export type Question = {
 export type ResultProfile = {
   scores: Record<QuizCategory, number>;
   recommendedPath: string;
+  persona: string;
 };
 
 export type RoadmapStep = {
   step: string;
   description: string;
+};
+
+export type Roadmap = {
+  skillChecklist: string[];
+  dayInTheLife: string;
+  firstSteps: { text: string; url: string }[];
 };

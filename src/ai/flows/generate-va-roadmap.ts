@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Generates a 4-step roadmap (Learn, Practice, Portfolio, Apply) tailored to the user's recommended VA career path.
+ * @fileOverview Generates a detailed roadmap based on the user's VA persona.
  *
  * - generateVaRoadmap - A function that generates the roadmap.
  * - GenerateVaRoadmapInput - The input type for the generateVaRoadmap function.
@@ -12,17 +12,19 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateVaRoadmapInputSchema = z.object({
-  careerPath: z.string().describe('The recommended VA career path for the user.'),
+  persona: z.string().describe('The VA persona assigned to the user (e.g., The Optimizer, The Visionary).'),
 });
 export type GenerateVaRoadmapInput = z.infer<typeof GenerateVaRoadmapInputSchema>;
 
 const GenerateVaRoadmapOutputSchema = z.object({
-  roadmap: z.array(
+  skillChecklist: z.array(z.string()).describe('A checklist of specific skills to learn, tailored to the persona.'),
+  dayInTheLife: z.string().describe("A brief, realistic snippet describing a typical day for this type of VA."),
+  firstSteps: z.array(
     z.object({
-      step: z.string().describe('The name of the step in the roadmap.'),
-      description: z.string().describe('The description of the step.'),
+      text: z.string().describe('The clickable text for the resource link.'),
+      url: z.string().url().describe('A placeholder URL for a helpful article, tool, or course.'),
     })
-  ).describe('A 4-step roadmap for the user to follow.'),
+  ).describe('A list of 3 actionable first-step links for the user to explore.'),
 });
 export type GenerateVaRoadmapOutput = z.infer<typeof GenerateVaRoadmapOutputSchema>;
 
@@ -34,11 +36,14 @@ const prompt = ai.definePrompt({
   name: 'generateVaRoadmapPrompt',
   input: {schema: GenerateVaRoadmapInputSchema},
   output: {schema: GenerateVaRoadmapOutputSchema},
-  prompt: `You are a career coach specializing in virtual assistant careers. Generate a 4-step roadmap (Learn, Practice, Portfolio, Apply) tailored to the user's recommended VA career path, so they can understand how to get started.
+  prompt: `You are a career coach specializing in virtual assistant careers. A user has been assigned a VA persona based on a quiz. Generate a detailed, practical roadmap for them.
 
-Career Path: {{{careerPath}}}
+VA Persona: {{{persona}}}
 
-Roadmap:`, 
+Based on this persona, provide the following:
+1.  **Skill Checklist:** A list of 5-7 specific, learnable skills. (e.g., "Learn Pivot Tables," "Master Canva Layers").
+2.  **Day in the Life:** A short, engaging paragraph (2-3 sentences) describing a typical workday to set realistic expectations.
+3.  **First Steps:** Exactly three actionable resource links. These can be for well-known tools, popular learning platforms, or insightful articles. Use placeholder URLs (e.g., https://placeholder.com/link).`,
 });
 
 const generateVaRoadmapFlow = ai.defineFlow(
