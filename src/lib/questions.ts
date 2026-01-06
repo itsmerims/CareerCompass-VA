@@ -101,6 +101,36 @@ export const questions: Question[] = [
       { text: 'The ability to see future trends in data patterns.', weights: { analytical: 5 } },
     ],
   },
+  {
+    id: 11,
+    text: "Do you prefer working in a quiet, focused environment or a fast-paced, interactive one?",
+    answers: [
+        { text: "Quiet and focused, where I can concentrate on data or writing.", weights: { analytical: 5, administrative: 3 } },
+        { text: "Fast-paced and interactive, like social media or customer support.", weights: { creative: 4, customerCentric: 5 } },
+        { text: "A mix of both is ideal.", weights: { technical: 3, administrative: 2 } },
+        { text: "I'm adaptable to either environment.", weights: { } },
+    ]
+  },
+  {
+    id: 12,
+    text: "Which of these have you opened in the last 30 days?",
+    answers: [
+        { text: "Excel or Google Sheets.", weights: { analytical: 5, administrative: 2 } },
+        { text: "Canva or another design tool.", weights: { creative: 5 } },
+        { text: "ChatGPT or another AI assistant.", weights: { technical: 3, creative: 2 } },
+        { text: "None of the above.", weights: { } },
+    ]
+  },
+  {
+    id: 13,
+    text: "How do you react when a client gives you vague instructions?",
+    answers: [
+        { text: "I ask for a follow-up meeting to clarify details.", weights: { customerCentric: 5, administrative: 3 } },
+        { text: "I research examples and present a few options.", weights: { creative: 4, analytical: 3 } },
+        { text: "I try to build a first version and get feedback.", weights: { technical: 4, creative: 2 } },
+        { text: "I wait for them to provide more information.", weights: { administrative: 1 } },
+    ]
+  }
 ];
 
 
