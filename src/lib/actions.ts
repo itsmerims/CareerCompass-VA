@@ -1,7 +1,7 @@
 'use server';
 
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from './firebase';
+import { serverTimestamp } from 'firebase/firestore';
+import { adminDb } from './firebase';
 import type { ResultProfile } from './types';
 
 // The result object here is everything in ResultProfile except the persona, which is passed separately.
@@ -12,7 +12,7 @@ export async function saveAssessmentResult(userId: string, result: Omit<ResultPr
   }
   
   try {
-    const docRef = await addDoc(collection(db, 'results'), {
+    const docRef = await adminDb.collection('results').add({
       userId,
       ...result,
       persona,
