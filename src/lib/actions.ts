@@ -1,13 +1,14 @@
+
 'use server';
 
-import { serverTimestamp } from 'firebase/firestore';
+import { serverTimestamp } from 'firebase-admin/firestore';
 import { adminDb } from './firebase';
 import type { ResultProfile } from './types';
 
 // The result object here is everything in ResultProfile except the persona, which is passed separately.
 export async function saveAssessmentResult(userId: string, result: Omit<ResultProfile, 'persona'>, persona: string) {
-  if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID === "your-project-id") {
-    console.log("Firebase not configured. Skipping save. Profile data:", { ...result, persona, userId });
+  if (!adminDb.collection) {
+    console.log("Firebase Admin not configured. Skipping save. Profile data:", { ...result, persona, userId });
     return { success: true, id: 'local-test-id' };
   }
   
