@@ -1,5 +1,3 @@
-'use server';
-
 // This file is intended to be used on the server-side only.
 // It is not part of the client-side bundle.
 
