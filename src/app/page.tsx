@@ -95,11 +95,13 @@ export default function Home() {
         .then(response => {
           if (response.success && response.id) {
              setResultId(response.id);
-          } else {
-            console.warn("Failed to save results (this is expected if the backend is not configured):", response.error);
+          } else if (!response.success) {
+            // Only log a warning if the backend isn't configured. Don't show a toast.
+            console.warn("Failed to save results:", response.error);
           }
         })
         .catch(err => {
+          // This catches unexpected errors during the fetch itself
           console.error("An unexpected error occurred while saving results:", err);
           toast({
             variant: "destructive",
@@ -119,12 +121,16 @@ export default function Home() {
       setRoadmap(output);
       setAppState("roadmap");
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating roadmap:", error);
+      let description = "There was a problem generating your roadmap. Please try again.";
+      if (error.message && error.message.includes("503")) {
+        description = "The AI model is currently overloaded. Please wait a moment and try again.";
+      }
       toast({
         variant: "destructive",
         title: "Generation Failed",
-        description: "There was a problem generating your roadmap. Please try again.",
+        description: description,
       });
     } finally {
       setIsGenerating(false);
@@ -155,7 +161,13 @@ export default function Home() {
           description: "Your personalized roadmap has been successfully saved.",
         });
       } else {
-        throw new Error(response.error || "An unknown error occurred.");
+        // Handle cases where the backend isn't configured without showing a user-facing error
+        console.warn("Failed to save roadmap:", response.error);
+        toast({
+          variant: "destructive",
+          title: "Save Failed",
+          description: response.error || "Could not save the roadmap.",
+        });
       }
     } catch (error: any) {
       console.error("Error saving roadmap:", error);
