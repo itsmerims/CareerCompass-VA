@@ -1,7 +1,7 @@
 
 'use server';
 
-import { serverTimestamp } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { getAdminDb } from '@/firebase/admin';
 import type { ResultProfile, Roadmap } from './types';
 
@@ -20,7 +20,7 @@ export async function saveAssessmentResult(
       const docRef = db.collection('results').doc(docId);
       await docRef.update({
         roadmap,
-        updatedAt: serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
       console.log('Document updated with ID: ', docId);
       return { success: true, id: docId };
@@ -30,7 +30,7 @@ export async function saveAssessmentResult(
         userId,
         ...result,
         persona,
-        createdAt: serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
       });
       console.log('Document written with ID: ', docRef.id);
       return { success: true, id: docRef.id };
