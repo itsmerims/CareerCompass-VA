@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { useState, useMemo, startTransition } from "react";
-import type { AnswerWeight, ResultProfile, QuizCategory, Roadmap as RoadmapType } from "@/lib/types";
+import type { AnswerWeight, ResultProfile, Roadmap as RoadmapType } from "@/lib/types";
 import { questions, totalPossibleScores } from "@/lib/questions";
 import { CATEGORIES, CATEGORY_NAMES } from "@/lib/types";
 import { generateVaRoadmap, type GenerateVaRoadmapOutput } from "@/ai/flows/generate-va-roadmap";
@@ -45,6 +45,7 @@ export default function Home() {
   };
 
   const handleQuizComplete = async (answers: AnswerWeight[]) => {
+    setSelectedAnswers(answers);
     const scores: Record<QuizCategory, number> = {
       administrative: 0,
       creative: 0,
@@ -90,11 +91,14 @@ export default function Home() {
     };
     
     try {
+      // We await here to ensure we get an ID before proceeding.
       const response = await saveAssessmentResult("guest-user", dataToSave);
       if (response.success && response.id) {
          setResultId(response.id);
       } else if (!response.success) {
-        // Only log a warning if the backend isn't configured. Don't show a toast.
+        // This case handles when the backend isn't configured.
+        // We log a warning but don't show a user-facing error.
+        // resultId will remain null.
         console.warn("Failed to save results:", response.error);
       }
     } catch (err) {
@@ -139,6 +143,7 @@ export default function Home() {
 
   const handleSaveRoadmap = async (roadmapToSave: RoadmapType) => {
     if (!resultId || !results) {
+      // This check is still good as a safeguard.
       toast({
         variant: "destructive",
         title: "Save Failed",
@@ -163,10 +168,10 @@ export default function Home() {
       } else {
         // Handle cases where the backend isn't configured without showing a user-facing error
         console.warn("Failed to save roadmap:", response.error);
-        if (response.error?.includes('The server is not configured')) {
-            // Don't show a toast if the backend isn't configured.
-        } else {
-            toast({
+        // We don't show a toast here because the button should have been disabled,
+        // but as a fallback, we avoid showing a confusing error to the user.
+        if (response.error && !response.error.includes('The server is not configured')) {
+           toast({
                 variant: "destructive",
                 title: "Save Failed",
                 description: response.error || "Could not save the roadmap.",
@@ -190,7 +195,7 @@ export default function Home() {
       case "results":
         return results && <Results scores={results.scores} recommendedPath={results.recommendedPath} onGenerateRoadmap={handleGenerateRoadmap} isGenerating={isGenerating} />;
       case "roadmap":
-        return roadmap && <Roadmap roadmap={roadmap} careerPath={results?.recommendedPath || ""} onRestart={handleRestart} onSave={handleSaveRoadmap} />;
+        return roadmap && <Roadmap roadmap={roadmap} careerPath={results?.recommendedPath || ""} onRestart={handleRestart} onSave={handleSaveRoadmap} isSaveDisabled={!resultId} />;
       case "intro":
       default:
         return (
@@ -232,5 +237,3 @@ export default function Home() {
     </main>
   );
 }
-
-    

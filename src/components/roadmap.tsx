@@ -6,15 +6,18 @@ import type { GenerateVaRoadmapOutput } from "@/ai/flows/generate-va-roadmap";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Lightbulb, Link as LinkIcon, Loader2, Save } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 interface RoadmapProps {
   roadmap: GenerateVaRoadmapOutput;
   careerPath: string;
   onRestart: () => void;
   onSave: (roadmap: GenerateVaRoadmapOutput) => Promise<void>;
+  isSaveDisabled: boolean;
 }
 
-export function Roadmap({ roadmap, careerPath, onRestart, onSave }: RoadmapProps) {
+export function Roadmap({ roadmap, careerPath, onRestart, onSave, isSaveDisabled }: RoadmapProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
 
@@ -24,6 +27,27 @@ export function Roadmap({ roadmap, careerPath, onRestart, onSave }: RoadmapProps
     setIsSaving(false);
     setHasSaved(true);
   };
+  
+  const saveButton = (
+      <Button size="lg" className="w-full sm:w-auto" onClick={handleSave} disabled={isSaveDisabled || isSaving || hasSaved}>
+        {isSaving ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Saving...
+          </>
+        ) : hasSaved ? (
+           <>
+            <CheckCircle2 className="mr-2 h-4 w-4" />
+            Saved!
+          </>
+        ) : (
+          <>
+            <Save className="mr-2 h-4 w-4" />
+            Save Roadmap
+          </>
+        )}
+      </Button>
+  );
 
   return (
     <Card className="w-full max-w-2xl animate-in fade-in-0 zoom-in-95 duration-500">
@@ -65,24 +89,21 @@ export function Roadmap({ roadmap, careerPath, onRestart, onSave }: RoadmapProps
         </div>
       </CardContent>
       <CardFooter className="flex flex-col sm:flex-row gap-2">
-         <Button size="lg" className="w-full sm:w-auto" onClick={handleSave} disabled={isSaving || hasSaved}>
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : hasSaved ? (
-             <>
-              <CheckCircle2 className="mr-2 h-4 w-4" />
-              Saved!
-            </>
-          ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Save Roadmap
-            </>
-          )}
-        </Button>
+         {isSaveDisabled ? (
+           <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* The div wrapper is necessary for Tooltip to work on a disabled button */}
+                <div className="w-full sm:w-auto">{saveButton}</div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Saving is disabled because the backend is not configured.</p>
+              </TooltipContent>
+            </Tooltip>
+           </TooltipProvider>
+         ) : (
+            saveButton
+         )}
         <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={onRestart}>
           Start Over
         </Button>
