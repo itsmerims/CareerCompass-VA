@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -84,15 +85,25 @@ export default function Home() {
       setAppState("results");
       
       // Save result to Firestore without blocking UI
-      // Using a placeholder userId for now. This will be replaced with the actual user ID after implementing auth.
-      saveAssessmentResult("guest-user", { scores: resultProfile.scores, recommendedPath: resultProfile.recommendedPath }, resultProfile.persona).catch(err => {
-        console.error("Failed to save results:", err);
-        toast({
-          variant: "destructive",
-          title: "Save Failed",
-          description: "There was a problem saving your results.",
+      saveAssessmentResult("guest-user", { scores: resultProfile.scores, recommendedPath: resultProfile.recommendedPath }, resultProfile.persona)
+        .then(response => {
+          if (!response.success) {
+            console.warn("Failed to save results:", response.error);
+            toast({
+              variant: "destructive",
+              title: "Save Failed",
+              description: "Could not save your results. This might be a server configuration issue.",
+            });
+          }
+        })
+        .catch(err => {
+          console.error("An unexpected error occurred while saving results:", err);
+          toast({
+            variant: "destructive",
+            title: "Save Failed",
+            description: "An unexpected error occurred while saving your results.",
+          });
         });
-      });
     });
   };
   
