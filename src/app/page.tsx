@@ -91,18 +91,18 @@ export default function Home() {
     };
     
     try {
-      // We await here to ensure we get an ID before proceeding.
       const response = await saveAssessmentResult("guest-user", dataToSave);
       if (response.success && response.id) {
          setResultId(response.id);
-      } else if (!response.success) {
-        // This case handles when the backend isn't configured.
-        // We log a warning but don't show a user-facing error.
-        // resultId will remain null.
-        console.warn("Failed to save results:", response.error);
+      } else {
+        console.error("Failed to save results:", response.error);
+        toast({
+          variant: "destructive",
+          title: "Save Failed",
+          description: response.error || "Could not save your results.",
+        });
       }
     } catch (err) {
-      // This catches unexpected errors during the fetch itself
       console.error("An unexpected error occurred while saving results:", err);
       toast({
         variant: "destructive",
@@ -143,7 +143,6 @@ export default function Home() {
 
   const handleSaveRoadmap = async (roadmapToSave: RoadmapType) => {
     if (!resultId || !results) {
-      // This check is still good as a safeguard.
       toast({
         variant: "destructive",
         title: "Save Failed",
@@ -166,17 +165,11 @@ export default function Home() {
           description: "Your personalized roadmap has been successfully saved.",
         });
       } else {
-        // Handle cases where the backend isn't configured without showing a user-facing error
-        console.warn("Failed to save roadmap:", response.error);
-        // We don't show a toast here because the button should have been disabled,
-        // but as a fallback, we avoid showing a confusing error to the user.
-        if (response.error && !response.error.includes('The server is not configured')) {
-           toast({
-                variant: "destructive",
-                title: "Save Failed",
-                description: response.error || "Could not save the roadmap.",
-            });
-        }
+        toast({
+          variant: "destructive",
+          title: "Save Failed",
+          description: response.error || "Could not save the roadmap.",
+        });
       }
     } catch (error: any) {
       console.error("Error saving roadmap:", error);
