@@ -46,7 +46,8 @@ export async function saveAssessmentResult(
 export async function getSavedRoadmaps(userId: string) {
   try {
     const db = getAdminDb();
-    const snapshot = await db.collection('results').where('userId', '==', userId).orderBy('createdAt', 'desc').get();
+    // Query without ordering to avoid needing a composite index.
+    const snapshot = await db.collection('results').where('userId', '==', userId).get();
     if (snapshot.empty) {
       return [];
     }
@@ -54,15 +55,21 @@ export async function getSavedRoadmaps(userId: string) {
     const roadmaps: (ResultProfile & { id: string, createdAt: string, roadmap?: Roadmap })[] = [];
     snapshot.forEach(doc => {
       const data = doc.data();
-      roadmaps.push({
-        id: doc.id,
-        scores: data.scores,
-        recommendedPath: data.recommendedPath,
-        persona: data.persona,
-        roadmap: data.roadmap,
-        createdAt: data.createdAt.toDate().toISOString(),
-      });
+      // Ensure createdAt exists and is a timestamp before converting
+      if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+        roadmaps.push({
+          id: doc.id,
+          scores: data.scores,
+          recommendedPath: data.recommendedPath,
+          persona: data.persona,
+          roadmap: data.roadmap,
+          createdAt: data.createdAt.toDate().toISOString(),
+        });
+      }
     });
+
+    // Sort the results in the application code instead of the query.
+    roadmaps.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return roadmaps;
   } catch (e: any) {
