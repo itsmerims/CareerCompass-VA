@@ -88,15 +88,12 @@ export default function Home() {
       saveAssessmentResult("guest-user", { scores: resultProfile.scores, recommendedPath: resultProfile.recommendedPath }, resultProfile.persona)
         .then(response => {
           if (!response.success) {
-            console.warn("Failed to save results:", response.error);
-            toast({
-              variant: "destructive",
-              title: "Save Failed",
-              description: "Could not save your results. This might be a server configuration issue.",
-            });
+            // Log a warning for developers if backend is not configured, but don't show a user-facing error.
+            console.warn("Failed to save results (this is expected if the backend is not configured):", response.error);
           }
         })
         .catch(err => {
+          // Show a toast for unexpected errors during the save process.
           console.error("An unexpected error occurred while saving results:", err);
           toast({
             variant: "destructive",
