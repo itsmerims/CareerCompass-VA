@@ -13,20 +13,13 @@ export async function saveAssessmentResult(
 ) {
   const { result, persona, roadmap } = data;
 
-  try {
-    // The adminDb object is initialized in @/firebase/admin.ts.
-    // If FIREBASE_SERVICE_ACCOUNT_KEY is missing or invalid, adminDb will be undefined,
-    // and attempting to use it here will throw a runtime error, which will be caught below.
-    // This is the correct way to handle initialization failures.
-    if (!adminDb) {
-      // This check is the source of the problem. If environment variables are not picked up on a hot reload,
-      // this check will fail even if the .env file is correct.
-      // By removing it, we rely on the actual Firestore call to fail, which is more robust.
-      const errorMessage = 'The server is not configured for Firebase. Please ensure FIREBASE_SERVICE_ACCOUNT_KEY is set in your environment variables. Assessment results will not be saved.';
+  if (!adminDb) {
+      const errorMessage = 'Firebase Admin SDK is not initialized. The FIREBASE_SERVICE_ACCOUNT_KEY may be missing or invalid in your environment variables.';
       console.error(errorMessage);
       return { success: false, error: errorMessage };
-    }
+  }
 
+  try {
     if (docId) {
       // If a document ID is provided, update the existing document with the roadmap.
       const docRef = adminDb.collection('results').doc(docId);
