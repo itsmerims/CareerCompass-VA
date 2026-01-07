@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { useState, useMemo, startTransition } from "react";
-import type { AnswerWeight, ResultProfile, QuizCategory } from "@/lib/types";
+import type { AnswerWeight, ResultProfile, QuizCategory, Roadmap as RoadmapType } from "@/lib/types";
 import { questions, totalPossibleScores } from "@/lib/questions";
 import { CATEGORIES, CATEGORY_NAMES } from "@/lib/types";
 import { generateVaRoadmap, type GenerateVaRoadmapOutput } from "@/ai/flows/generate-va-roadmap";
@@ -26,6 +26,7 @@ export default function Home() {
   const [results, setResults] = useState<ResultProfile | null>(null);
   const [roadmap, setRoadmap] = useState<GenerateVaRoadmapOutput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [resultId, setResultId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const heroImage = useMemo(() => placeholderData.placeholderImages.find(img => img.id === 'hero'), []);
@@ -39,6 +40,7 @@ export default function Home() {
     setResults(null);
     setRoadmap(null);
     setIsGenerating(false);
+    setResultId(null);
     setAppState("intro");
   };
 
@@ -84,16 +86,20 @@ export default function Home() {
       setResults(resultProfile);
       setAppState("results");
       
-      // Save result to Firestore without blocking UI
-      saveAssessmentResult("guest-user", { scores: resultProfile.scores, recommendedPath: resultProfile.recommendedPath }, resultProfile.persona)
+      const dataToSave = {
+        result: { scores: resultProfile.scores, recommendedPath: resultProfile.recommendedPath },
+        persona: resultProfile.persona,
+      }
+      
+      saveAssessmentResult("guest-user", dataToSave)
         .then(response => {
-          if (!response.success) {
-            // Log a warning for developers if backend is not configured, but don't show a user-facing error.
+          if (response.success && response.id) {
+             setResultId(response.id);
+          } else {
             console.warn("Failed to save results (this is expected if the backend is not configured):", response.error);
           }
         })
         .catch(err => {
-          // Show a toast for unexpected errors during the save process.
           console.error("An unexpected error occurred while saving results:", err);
           toast({
             variant: "destructive",
@@ -125,6 +131,42 @@ export default function Home() {
     }
   };
 
+  const handleSaveRoadmap = async (roadmapToSave: RoadmapType) => {
+    if (!resultId || !results) {
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: "Could not save the roadmap. No result ID found.",
+      });
+      return;
+    }
+
+    const dataToSave = {
+      result: { scores: results.scores, recommendedPath: results.recommendedPath },
+      persona: results.persona,
+      roadmap: roadmapToSave,
+    }
+
+    try {
+      const response = await saveAssessmentResult("guest-user", dataToSave, resultId);
+      if (response.success) {
+        toast({
+          title: "Roadmap Saved!",
+          description: "Your personalized roadmap has been successfully saved.",
+        });
+      } else {
+        throw new Error(response.error || "An unknown error occurred.");
+      }
+    } catch (error: any) {
+      console.error("Error saving roadmap:", error);
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: error.message || "There was a problem saving your roadmap.",
+      });
+    }
+  };
+
   const renderContent = () => {
     switch (appState) {
       case "quiz":
@@ -132,7 +174,7 @@ export default function Home() {
       case "results":
         return results && <Results scores={results.scores} recommendedPath={results.recommendedPath} onGenerateRoadmap={handleGenerateRoadmap} isGenerating={isGenerating} />;
       case "roadmap":
-        return roadmap && <Roadmap roadmap={roadmap} careerPath={results?.recommendedPath || ""} onRestart={handleRestart} />;
+        return roadmap && <Roadmap roadmap={roadmap} careerPath={results?.recommendedPath || ""} onRestart={handleRestart} onSave={handleSaveRoadmap} />;
       case "intro":
       default:
         return (
