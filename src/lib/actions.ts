@@ -11,6 +11,9 @@ export async function saveAssessmentResult(
   data: { result: Omit<ResultProfile, 'persona'>; persona: string; roadmap?: Roadmap },
   docId?: string | null
 ) {
+  // adminDb will be undefined if the service account key is missing or invalid.
+  // In that case, the initialization in @/firebase/admin.ts would have already logged a warning.
+  // We return an error so the frontend can handle it.
   if (!adminDb) {
     const errorMessage = 'The server is not configured for Firebase. Please ensure FIREBASE_SERVICE_ACCOUNT_KEY is set in your environment variables. Assessment results will not be saved.';
     console.warn(errorMessage);

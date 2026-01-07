@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState, useMemo, startTransition } from "react";
 import type { AnswerWeight, ResultProfile, Roadmap as RoadmapType } from "@/lib/types";
 import { questions, totalPossibleScores } from "@/lib/questions";
-import { CATEGORIES, CATEGORY_NAMES } from "@/lib/types";
+import { CATEGORIES, CATEGORY_NAMES, QuizCategory } from "@/lib/types";
 import { generateVaRoadmap, type GenerateVaRoadmapOutput } from "@/ai/flows/generate-va-roadmap";
 import { saveAssessmentResult } from "@/lib/actions";
 
