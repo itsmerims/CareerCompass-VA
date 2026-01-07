@@ -22,7 +22,7 @@ const GenerateVaRoadmapOutputSchema = z.object({
   firstSteps: z.array(
     z.object({
       text: z.string().describe('The clickable text for the resource link.'),
-      url: z.string().url().describe('A placeholder URL for a helpful article, tool, or course.'),
+      url: z.string().url().describe('A real, valid URL for a helpful article, tool, or course.'),
     })
   ).describe('A list of 3 actionable first-step links for the user to explore.'),
 });
@@ -43,7 +43,7 @@ VA Persona: {{{persona}}}
 Based on this persona, provide the following:
 1.  **Skill Checklist:** A list of 5-7 specific, learnable skills. (e.g., "Learn Pivot Tables," "Master Canva Layers").
 2.  **Day in the Life:** A short, engaging paragraph (2-3 sentences) describing a typical workday to set realistic expectations.
-3.  **First Steps:** Exactly three actionable resource links. These can be for well-known tools, popular learning platforms, or insightful articles. Use placeholder URLs (e.g., https://placeholder.com/link).`,
+3.  **First Steps:** Exactly three actionable resource links with real, valid URLs. These should be for well-known tools (like Asana, Canva), popular learning platforms (like Udemy, Coursera), or insightful articles from reputable sources.`,
 });
 
 const generateVaRoadmapFlow = ai.defineFlow(
