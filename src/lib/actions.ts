@@ -42,3 +42,32 @@ export async function saveAssessmentResult(
     return { success: false, error: errorMessage };
   }
 }
+
+export async function getSavedRoadmaps(userId: string) {
+  try {
+    const db = getAdminDb();
+    const snapshot = await db.collection('results').where('userId', '==', userId).orderBy('createdAt', 'desc').get();
+    if (snapshot.empty) {
+      return [];
+    }
+    
+    const roadmaps: (ResultProfile & { id: string, createdAt: string, roadmap?: Roadmap })[] = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      roadmaps.push({
+        id: doc.id,
+        scores: data.scores,
+        recommendedPath: data.recommendedPath,
+        persona: data.persona,
+        roadmap: data.roadmap,
+        createdAt: data.createdAt.toDate().toISOString(),
+      });
+    });
+
+    return roadmaps;
+  } catch (e: any) {
+    console.error('Error fetching roadmaps:', e);
+    // In a real app, you'd want more robust error handling/logging
+    return [];
+  }
+}

@@ -2,6 +2,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useMemo, startTransition } from "react";
 import type { AnswerWeight, ResultProfile, Roadmap as RoadmapType } from "@/lib/types";
 import { questions, totalPossibleScores } from "@/lib/questions";
@@ -198,9 +199,12 @@ export default function Home() {
                 <CompassIcon className="h-12 w-12 text-primary" />
                 <h1 className="font-headline text-4xl md:text-5xl font-bold mt-4">CareerCompass VA</h1>
                 <p className="mt-4 text-lg text-muted-foreground">Unsure where to start in the world of Virtual Assistance? Take our quick assessment to discover the VA career path that best matches your skills and passions.</p>
-                <div className="mt-8">
+                <div className="mt-8 flex flex-col sm:flex-row gap-4">
                   <Button size="lg" className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90" onClick={handleStart}>
                     Start Assessment
+                  </Button>
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
+                     <Link href="/my-roadmaps">My Saved Roadmaps</Link>
                   </Button>
                 </div>
               </div>
