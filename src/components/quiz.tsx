@@ -5,24 +5,29 @@ import type { Question, AnswerWeight } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Loader2 } from 'lucide-react';
 
 interface QuizProps {
   questions: Question[];
-  onComplete: (answers: AnswerWeight[]) => void;
+  onComplete: (answers: AnswerWeight[]) => Promise<void>;
 }
 
 export function Quiz({ questions, onComplete }: QuizProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<AnswerWeight[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAnswer = (answer: AnswerWeight) => {
+  const handleAnswer = async (answer: AnswerWeight) => {
+    setIsSubmitting(true);
     const newAnswers = [...selectedAnswers, answer];
     setSelectedAnswers(newAnswers);
 
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setIsSubmitting(false);
     } else {
-      onComplete(newAnswers);
+      await onComplete(newAnswers);
+      // No need to set submitting to false here as the component will unmount
     }
   };
 
@@ -46,11 +51,18 @@ export function Quiz({ questions, onComplete }: QuizProps) {
               size="lg"
               className="h-auto whitespace-normal py-4 justify-start text-left hover:bg-primary/20 hover:border-primary"
               onClick={() => handleAnswer(answer.weights)}
+              disabled={isSubmitting}
             >
               {answer.text}
             </Button>
           ))}
         </div>
+        {isSubmitting && currentQuestionIndex === questions.length - 1 && (
+            <div className="mt-6 flex items-center justify-center text-muted-foreground">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Calculating your results...
+            </div>
+        )}
       </CardContent>
       <CardFooter className='justify-end'>
          <p className="text-sm text-muted-foreground">Select the option that best describes you.</p>
@@ -58,3 +70,5 @@ export function Quiz({ questions, onComplete }: QuizProps) {
     </Card>
   );
 }
+
+    

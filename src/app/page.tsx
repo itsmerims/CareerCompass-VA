@@ -44,71 +44,71 @@ export default function Home() {
     setAppState("intro");
   };
 
-  const handleQuizComplete = (answers: AnswerWeight[]) => {
-    startTransition(() => {
-      const scores: Record<QuizCategory, number> = {
-        administrative: 0,
-        creative: 0,
-        technical: 0,
-        analytical: 0,
-        customerCentric: 0,
-      };
+  const handleQuizComplete = async (answers: AnswerWeight[]) => {
+    const scores: Record<QuizCategory, number> = {
+      administrative: 0,
+      creative: 0,
+      technical: 0,
+      analytical: 0,
+      customerCentric: 0,
+    };
 
-      answers.forEach(answer => {
-        for (const key in answer) {
-          const category = key as QuizCategory;
-          if (CATEGORIES.includes(category)) {
-            scores[category] += answer[category] || 0;
-          }
+    answers.forEach(answer => {
+      for (const key in answer) {
+        const category = key as QuizCategory;
+        if (CATEGORIES.includes(category)) {
+          scores[category] += answer[category] || 0;
         }
-      });
-      
-      const percentageScores: Record<QuizCategory, number> = { ...scores };
-      let highestScore = -1;
-      let recommendedPath: QuizCategory = 'administrative';
-
-      (Object.keys(scores) as QuizCategory[]).forEach(category => {
-        const percentage = Math.round((scores[category] / totalPossibleScores[category]) * 100);
-        percentageScores[category] = percentage;
-
-        if (percentage > highestScore) {
-          highestScore = percentage;
-          recommendedPath = category;
-        }
-      });
-
-      const resultProfile: ResultProfile = {
-        scores: percentageScores,
-        recommendedPath: CATEGORY_NAMES[recommendedPath],
-        persona: CATEGORY_NAMES[recommendedPath],
-      };
-
-      setResults(resultProfile);
-      setAppState("results");
-      
-      const dataToSave = {
-        result: { scores: resultProfile.scores, recommendedPath: resultProfile.recommendedPath },
-        persona: resultProfile.persona,
       }
-      
-      saveAssessmentResult("guest-user", dataToSave)
-        .then(response => {
-          if (response.success && response.id) {
-             setResultId(response.id);
-          } else if (!response.success) {
-            // Only log a warning if the backend isn't configured. Don't show a toast.
-            console.warn("Failed to save results:", response.error);
-          }
-        })
-        .catch(err => {
-          // This catches unexpected errors during the fetch itself
-          console.error("An unexpected error occurred while saving results:", err);
-          toast({
-            variant: "destructive",
-            title: "Save Failed",
-            description: "An unexpected error occurred while saving your results.",
-          });
-        });
+    });
+    
+    const percentageScores: Record<QuizCategory, number> = { ...scores };
+    let highestScore = -1;
+    let recommendedPath: QuizCategory = 'administrative';
+
+    (Object.keys(scores) as QuizCategory[]).forEach(category => {
+      const percentage = Math.round((scores[category] / totalPossibleScores[category]) * 100);
+      percentageScores[category] = percentage;
+
+      if (percentage > highestScore) {
+        highestScore = percentage;
+        recommendedPath = category;
+      }
+    });
+
+    const resultProfile: ResultProfile = {
+      scores: percentageScores,
+      recommendedPath: CATEGORY_NAMES[recommendedPath],
+      persona: CATEGORY_NAMES[recommendedPath],
+    };
+
+    setResults(resultProfile);
+    
+    const dataToSave = {
+      result: { scores: resultProfile.scores, recommendedPath: resultProfile.recommendedPath },
+      persona: resultProfile.persona,
+    };
+    
+    try {
+      const response = await saveAssessmentResult("guest-user", dataToSave);
+      if (response.success && response.id) {
+         setResultId(response.id);
+      } else if (!response.success) {
+        // Only log a warning if the backend isn't configured. Don't show a toast.
+        console.warn("Failed to save results:", response.error);
+      }
+    } catch (err) {
+      // This catches unexpected errors during the fetch itself
+      console.error("An unexpected error occurred while saving results:", err);
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: "An unexpected error occurred while saving your results.",
+      });
+    }
+
+    startTransition(() => {
+        setAppState("results");
     });
   };
   
@@ -163,11 +163,15 @@ export default function Home() {
       } else {
         // Handle cases where the backend isn't configured without showing a user-facing error
         console.warn("Failed to save roadmap:", response.error);
-        toast({
-          variant: "destructive",
-          title: "Save Failed",
-          description: response.error || "Could not save the roadmap.",
-        });
+        if (response.error?.includes('The server is not configured')) {
+            // Don't show a toast if the backend isn't configured.
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Save Failed",
+                description: response.error || "Could not save the roadmap.",
+            });
+        }
       }
     } catch (error: any) {
       console.error("Error saving roadmap:", error);
@@ -228,3 +232,5 @@ export default function Home() {
     </main>
   );
 }
+
+    
