@@ -2,7 +2,6 @@
 
 CareerCompass VA is a web application designed to help aspiring and current Virtual Assistants identify their strengths and find their ideal career path. Users take a short, interactive assessment, and based on their answers, the app assigns them a "VA Persona" and uses Google's Gemini AI model to generate a personalized career roadmap.
 
-![CareerCompass VA Screenshot](https://storage.googleapis.com/studioprompt/carrercompassva/screenshot.png)
 
 ## Features
 
