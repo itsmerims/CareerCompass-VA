@@ -18,10 +18,12 @@ import { Card } from "@/components/ui/card";
 import { CompassIcon } from "@/components/icons";
 import placeholderData from "@/lib/placeholder-images.json";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/firebase";
 
 type AppState = "intro" | "quiz" | "results" | "roadmap";
 
 export default function Home() {
+  const { user } = useUser();
   const [appState, setAppState] = useState<AppState>("intro");
   const [selectedAnswers, setSelectedAnswers] = useState<AnswerWeight[]>([]);
   const [results, setResults] = useState<ResultProfile | null>(null);
@@ -90,26 +92,28 @@ export default function Home() {
       result: { scores: resultProfile.scores, recommendedPath: resultProfile.recommendedPath },
       persona: resultProfile.persona,
     };
-    
-    try {
-      const response = await saveAssessmentResult("guest-user", dataToSave);
-      if (response.success && response.id) {
-         setResultId(response.id);
-      } else {
-        console.error("Failed to save results:", response.error);
+
+    if (user) {
+      try {
+        const response = await saveAssessmentResult(user.uid, dataToSave);
+        if (response.success && response.id) {
+           setResultId(response.id);
+        } else {
+          console.error("Failed to save results:", response.error);
+          toast({
+            variant: "destructive",
+            title: "Save Failed",
+            description: response.error || "Could not save your results.",
+          });
+        }
+      } catch (err) {
+        console.error("An unexpected error occurred while saving results:", err);
         toast({
           variant: "destructive",
           title: "Save Failed",
-          description: response.error || "Could not save your results.",
+          description: "An unexpected error occurred while saving your results.",
         });
       }
-    } catch (err) {
-      console.error("An unexpected error occurred while saving results:", err);
-      toast({
-        variant: "destructive",
-        title: "Save Failed",
-        description: "An unexpected error occurred while saving your results.",
-      });
     }
 
     startTransition(() => {
@@ -143,6 +147,14 @@ export default function Home() {
   };
 
   const handleSaveRoadmap = async (roadmapToSave: RoadmapType) => {
+    if (!user) {
+        toast({
+            variant: "destructive",
+            title: "Not Logged In",
+            description: "You must be logged in to save a roadmap.",
+        });
+        return;
+    }
     if (!resultId || !results) {
       toast({
         variant: "destructive",
@@ -159,7 +171,7 @@ export default function Home() {
     }
 
     try {
-      const response = await saveAssessmentResult("guest-user", dataToSave, resultId);
+      const response = await saveAssessmentResult(user.uid, dataToSave, resultId);
       if (response.success) {
         toast({
           title: "Roadmap Saved!",
@@ -189,7 +201,7 @@ export default function Home() {
       case "results":
         return results && <Results scores={results.scores} recommendedPath={results.recommendedPath} onGenerateRoadmap={handleGenerateRoadmap} isGenerating={isGenerating} />;
       case "roadmap":
-        return roadmap && <Roadmap roadmap={roadmap} careerPath={results?.recommendedPath || ""} onRestart={handleRestart} onSave={handleSaveRoadmap} isSaveDisabled={!resultId} />;
+        return roadmap && <Roadmap roadmap={roadmap} careerPath={results?.recommendedPath || ""} onRestart={handleRestart} onSave={handleSaveRoadmap} isSaveDisabled={!user} />;
       case "intro":
       default:
         return (

@@ -12,9 +12,9 @@ export async function saveAssessmentResult(
   docId?: string | null
 ) {
   const { result, persona, roadmap } = data;
-
+  const db = getAdminDb();
+  
   try {
-    const db = getAdminDb();
     if (docId) {
       // If a document ID is provided, update the existing document with the roadmap.
       const docRef = db.collection('results').doc(docId);

@@ -1,17 +1,52 @@
 
+'use client';
+
 import Link from 'next/link';
 import { getSavedRoadmaps } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { CheckCircle2, Lightbulb, Link as LinkIcon, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Lightbulb, Link as LinkIcon, ArrowLeft, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useUser } from '@/firebase';
+import { useEffect, useState } from 'react';
+import type { ResultProfile, Roadmap } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
+type SavedRoadmap = ResultProfile & { id: string; createdAt: string; roadmap?: Roadmap };
 
-export default async function SavedRoadmapsPage() {
-  // For now, we'll use a hardcoded user ID. In a real app, this would come from an auth session.
-  const savedRoadmaps = await getSavedRoadmaps('guest-user');
+export default function SavedRoadmapsPage() {
+  const { user, loading } = useUser();
+  const router = useRouter();
+  const [roadmaps, setRoadmaps] = useState<SavedRoadmap[]>([]);
+  const [isLoadingRoadmaps, setIsLoadingRoadmaps] = useState(true);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  useEffect(() => {
+    if (user) {
+      setIsLoadingRoadmaps(true);
+      getSavedRoadmaps(user.uid)
+        .then(setRoadmaps)
+        .finally(() => setIsLoadingRoadmaps(false));
+    }
+  }, [user]);
+
+  if (loading || isLoadingRoadmaps) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; 
+  }
 
   return (
     <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 md:p-8">
@@ -29,15 +64,15 @@ export default async function SavedRoadmapsPage() {
           <CardHeader>
             <CardTitle className="font-headline text-3xl md:text-4xl">My Saved Roadmaps</CardTitle>
             <CardDescription>
-              {savedRoadmaps.length > 0
+              {roadmaps.length > 0
                 ? "Here are your previously saved assessment results and roadmaps."
                 : "You don't have any saved roadmaps yet. Take an assessment to get started!"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {savedRoadmaps.length > 0 ? (
+            {roadmaps.length > 0 ? (
               <Accordion type="single" collapsible className="w-full">
-                {savedRoadmaps.map((result, index) => (
+                {roadmaps.map((result, index) => (
                   <AccordionItem value={`item-${index}`} key={result.id}>
                     <AccordionTrigger>
                       <div className="text-left">

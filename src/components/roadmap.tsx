@@ -97,7 +97,7 @@ export function Roadmap({ roadmap, careerPath, onRestart, onSave, isSaveDisabled
                 <div className="w-full sm:w-auto">{saveButton}</div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Saving is disabled because the backend is not configured.</p>
+                <p>You must be logged in to save a roadmap.</p>
               </TooltipContent>
             </Tooltip>
            </TooltipProvider>

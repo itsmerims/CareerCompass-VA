@@ -2,10 +2,10 @@
 // as it only contains the firebase config object.
 
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyA_I55Z6l3i2y...",
+  authDomain: "studio-5348613997-5036e.firebaseapp.com",
+  projectId: "studio-5348613997-5036e",
+  storageBucket: "studio-5348613997-5036e.appspot.com",
+  messagingSenderId: "5348613997",
+  appId: "1:5348613997:web:96e832d203f56e9f2913e7",
 };
