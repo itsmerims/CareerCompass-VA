@@ -2,7 +2,7 @@
 // as it only contains the firebase config object.
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyA_I55Z6l3i2y...",
+  apiKey: "AIzaSyDFfF3J-xxxxxxxxxxxxxxxxxxxxx",
   authDomain: "studio-5348613997-5036e.firebaseapp.com",
   projectId: "studio-5348613997-5036e",
   storageBucket: "studio-5348613997-5036e.appspot.com",
