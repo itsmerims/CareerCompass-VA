@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -43,7 +44,7 @@ VA Persona: {{{persona}}}
 Based on this persona, provide the following:
 1.  **Skill Checklist:** A list of 5-7 specific, learnable skills. (e.g., "Learn Pivot Tables," "Master Canva Layers").
 2.  **Day in the Life:** A short, engaging paragraph (2-3 sentences) describing a typical workday to set realistic expectations.
-3.  **First Steps:** Exactly three actionable resource links with real, valid URLs. These should be for well-known tools (like Asana, Canva), popular learning platforms (like Udemy, Coursera), or insightful articles from reputable sources.`,
+3.  **First Steps:** Exactly three actionable resource links. IMPORTANT: Use a search engine to find real, valid URLs. Do not make up URLs. These should be for well-known tools (like Asana, Canva), popular learning platforms (like Udemy, Coursera), or insightful articles from reputable sources.`,
 });
 
 const generateVaRoadmapFlow = ai.defineFlow(
