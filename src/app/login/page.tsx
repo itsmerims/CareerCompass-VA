@@ -54,7 +54,7 @@ export default function LoginPage() {
     const auth = getAuth();
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
-      router.push('/my-roadmaps');
+      router.push('/assessment');
     } catch (error: any) {
       let description = 'An unexpected error occurred. Please try again.';
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -71,7 +71,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4">
+    <main className="flex min-h-[calc(100vh-4rem)] w-full flex-col items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
             <div className="flex justify-center mb-4">

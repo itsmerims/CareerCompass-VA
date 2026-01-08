@@ -14,15 +14,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { User as UserIcon, LogOut } from 'lucide-react';
+import { User as UserIcon, LogOut, BookMarked } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
   const { user, loading } = useUser();
+  const router = useRouter();
 
   const handleSignOut = async () => {
     const auth = getAuth();
     await signOut(auth);
+    router.push('/login');
   };
+  
+  const handleMyRoadmaps = () => {
+    router.push('/my-roadmaps');
+  }
 
   const getInitials = (email: string | null | undefined) => {
     if (!email) return '';
@@ -31,7 +38,7 @@ export function Header() {
 
   return (
     <header className="px-4 lg:px-6 h-16 flex items-center bg-card border-b">
-      <Link href="/" className="flex items-center justify-center">
+      <Link href={user ? "/assessment" : "/"} className="flex items-center justify-center">
         <CompassIcon className="h-6 w-6 text-primary" />
         <span className="sr-only">CareerCompass VA</span>
       </Link>
@@ -57,6 +64,11 @@ export function Header() {
                       </p>
                     </div>
                   </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleMyRoadmaps}>
+                    <BookMarked className="mr-2 h-4 w-4" />
+                    <span>My Roadmaps</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />

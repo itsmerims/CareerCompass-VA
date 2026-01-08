@@ -53,9 +53,9 @@ export default function SavedRoadmapsPage() {
       <div className="w-full max-w-2xl">
         <div className="mb-6">
           <Button asChild variant="outline">
-            <Link href="/">
+            <Link href="/assessment">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
+              Back to Assessment
             </Link>
           </Button>
         </div>
@@ -128,7 +128,7 @@ export default function SavedRoadmapsPage() {
               <div className="text-center py-10">
                 <p className="text-muted-foreground mb-4">No results found.</p>
                 <Button asChild>
-                  <Link href="/">Take the Assessment</Link>
+                  <Link href="/assessment">Take the Assessment</Link>
                 </Button>
               </div>
             )}
